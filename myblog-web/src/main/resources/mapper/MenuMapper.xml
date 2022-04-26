@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xiaomou.mapper.MenuMapper">
+
+    <select id="getAllMenuList" resultType="com.xiaomou.entity.Menu">
+        SELECT DISTINCT
+            tm.menu_id,
+            tm.menu_name,
+            tm.menu_url,
+            tm.parent_id,
+            tm.menu_sort,
+            tm.description,
+            tm.menu_icon
+        FROM
+            ( tb_role_menu trm LEFT JOIN tb_menu tm ON trm.menu_id = tm.menu_id )
+                LEFT JOIN tb_role tr ON tr.role_id = trm.role_id
+        WHERE tr.role_name = #{roleName}
+        ORDER BY
+            tm.menu_sort ASC
+    </select>
+</mapper>

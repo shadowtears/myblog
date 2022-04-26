@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xiaomou.mapper.UserMapper">
+
+    <select id="listUserRolesByUsername" resultType="java.lang.String">
+        SELECT tr.role_name
+        FROM tb_role tr
+                 INNER JOIN tb_role_user tru ON tr.role_id = tru.role_id
+                 INNER JOIN tb_user tu ON tu.user_id = tru.user_id
+        WHERE tu.username = #{username}
+    </select>
+    <select id="getUserListPage" resultType="com.xiaomou.dto.UserListPageDTO">
+        select
+        a.user_id,
+        a.nickname,
+        a.avatar,
+        a.create_time,
+        a.update_time,
+        a.is_silence,
+        b.description
+        from tb_user a
+        inner join tb_role_user c on a.user_id =c.user_id
+        inner join tb_role b on c.role_id = b.role_id
+        <where>
+            <if test="userQueryVO.roleName != null and userQueryVO.roleName!=''">
+                b.description = #{userQueryVO.roleName}
+            </if>
+            <if test="userQueryVO.nickName != null and userQueryVO.nickName!=''">
+                AND a.nickname like concat('%',#{userQueryVO.nickName},'%')
+            </if>
+        </where>
+    </select>
+    <select id="getApiUrlByUserName" resultType="com.xiaomou.entity.Api">
+        select *
+        from tb_api c,
+             (
+                 select a.role_id
+                 from tb_role_user a,
+                      tb_user b
+                 where a.user_id = b.user_ID
+                   and b.username = #{username}
+             ) t,
+             tb_role_api d
+
+        where d.role_id = t.role_id
+          and d.api_id = c.id
+    </select>
+</mapper>
