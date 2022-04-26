@@ -49,6 +49,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
 //                 放行注册请求
                 .antMatchers(HttpMethod.POST,"/user/registerUser").permitAll()
+                .antMatchers(HttpMethod.PUT,"/user/password").permitAll()
                 .anyRequest()
                 .access(("@dynamicPermission.checkPermisstion(authentication)"))
                 .and().csrf().disable();

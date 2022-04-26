@@ -7,13 +7,15 @@ import com.xiaomou.Result;
 import com.xiaomou.ResultInfo;
 import com.xiaomou.dto.UserListPageDTO;
 import com.xiaomou.service.UserService;
-import com.xiaomou.vo.RegisterUserVO;
 import com.xiaomou.vo.UserQueryVO;
+import com.xiaomou.vo.UserVO;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -64,22 +66,26 @@ public class UserController {
 
 
     @ApiOperation(value = "发送邮箱验证码")
-    @ApiImplicitParam(name = "email", value = "邮箱", required = true, dataType = "String")
-    @GetMapping("/sendEmailCode")
-    private Result sendCode(String email) {
-
+    @ApiImplicitParam(name = "email", value = "用户名", required = true, dataType = "String")
+    @GetMapping("/code")
+    public Result sendCode(String email) {
         userService.sendCode(email);
-        return  Result.ok().message("验证码发送成功,请注意查收");
+        return Result.ok().message("发送成功！");
     }
 
 
-    @ApiOperation(value = "注册用户")
+    @ApiOperation(value = "用户注册")
     @PostMapping("/registerUser")
-    public Result registerUser(@RequestBody RegisterUserVO registerUserVO){
+    public Result saveUser(@Valid @RequestBody UserVO user) {
+        userService.saveUser(user);
+        return Result.ok().message("注册成功！快去登录吧");
+    }
 
-        boolean b = userService.registerUser(registerUserVO);
-        return  Result.ok().message("注册成功,请前往登录");
-
+    @ApiOperation(value = "修改密码")
+    @PutMapping("/password")
+    public Result updatePassword(@Valid @RequestBody UserVO user) {
+        userService.updatePassword(user);
+        return Result.ok().message("修改成功！");
     }
 }
 

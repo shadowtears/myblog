@@ -40,7 +40,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         //昵称头像简介 公告 文章数量  分类数量 标签数量  公告 访问量
         //公告先写死 访问量后面在弄
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.select("nickname", "avatar", "intro").eq("username", "admin");
+        queryWrapper.select("nickname", "avatar", "intro").eq("username", "admin@qq.com");
         User user = userMapper.selectOne(queryWrapper);
         //获取文章数量
         Integer articleCount = articleMapper.selectCount(null);

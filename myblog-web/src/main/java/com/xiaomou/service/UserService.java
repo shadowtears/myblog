@@ -6,8 +6,8 @@ import com.xiaomou.dto.UserListPageDTO;
 import com.xiaomou.entity.Api;
 import com.xiaomou.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.xiaomou.vo.RegisterUserVO;
 import com.xiaomou.vo.UserQueryVO;
+import com.xiaomou.vo.UserVO;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -40,14 +40,26 @@ public interface UserService extends IService<User> {
     Integer updateSilenceById(Integer id, boolean flag);
 
     //根据用户名获得api
-    List<Api> getApiUrlByUserName (String username);
+    List<Api> getApiUrlByUserName(String username);
+
     /**
      * 发送邮箱验证码
      *
-     * @param email 邮箱号
+     * @param username 邮箱号
      */
-    void sendCode(String email);
+    void sendCode(String username);
 
+    /**
+     * 用户注册
+     *
+     * @param user 用户对象
+     */
+    void saveUser(UserVO user);
 
-    boolean  registerUser(RegisterUserVO registerUserVO);
+    /**
+     * 修改密码
+     *
+     * @param user 用户对象
+     */
+    void updatePassword(UserVO user);
 }
