@@ -2,6 +2,7 @@ package com.xiaomou.controller;
 
 
 import com.xiaomou.Result;
+import com.xiaomou.dto.ArticlePreviewListDTO;
 import com.xiaomou.dto.TagDTO;
 import com.xiaomou.entity.Tag;
 import com.xiaomou.mapper.TagMapper;
@@ -10,6 +11,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.web.bind.annotation.RestController;
@@ -44,11 +46,20 @@ public class TagController {
 
     @ApiOperation(value = "博客查看标签列表")
     @GetMapping("/tags")
-    public Result tags(){
+    public Result tags() {
         //需要获取标签id，名称，和总共数量
         List<TagDTO> data = tagService.listTagDTO();
         int count = tagService.count();
-        return  Result.ok().data("data", data).data("count", count);
+        return Result.ok().data("data", data).data("count", count);
+    }
+
+
+    @ApiOperation(value = "查看标签下对应的文章")
+    @GetMapping("/{tagId}")
+    public Result listArticlesByTagId(@PathVariable(value = "tagId") Integer tagId,
+                                      Integer current) {
+        ArticlePreviewListDTO data = tagService.listTagsByTagId(tagId, current);
+        return Result.ok().data("data", data);
     }
 
 }

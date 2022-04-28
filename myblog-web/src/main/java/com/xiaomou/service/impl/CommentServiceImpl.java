@@ -4,19 +4,22 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.xiaomou.dto.*;
 import com.xiaomou.entity.Comment;
 import com.xiaomou.entity.User;
+import com.xiaomou.handler.exception.MyRuntimeException;
 import com.xiaomou.mapper.CommentMapper;
+import com.xiaomou.mapper.UserMapper;
 import com.xiaomou.service.CommentService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xiaomou.util.HTMLUtil;
 import com.xiaomou.util.UserUtil;
 import com.xiaomou.vo.CommentVO;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 /**
  * <p>
- *  服务实现类
+ * 服务实现类
  * </p>
  *
  * @author xiaomou
@@ -24,6 +27,9 @@ import java.util.*;
  */
 @Service
 public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> implements CommentService {
+
+    @Autowired
+    private UserMapper userMapper;
 
     @Override
     public PageDTO<CommentDTO> listComments(Integer articleId, Integer current) {
@@ -52,7 +58,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
 //            replyDTO.setLikeCount(likeCountMap.get(replyDTO.getId().toString()));
 //        }
         //根据评论id查询回复量
-        List<ReplyCountDTO> replyCountDTOList =this.baseMapper.listReplyCountByCommentId(commentIdList);
+        List<ReplyCountDTO> replyCountDTOList = this.baseMapper.listReplyCountByCommentId(commentIdList);
         //将回复量封装成评论id对应回复量的map
         Map<Integer, Integer> replyCountMap = new HashMap<>(16);
         for (ReplyCountDTO replyCountDTO : replyCountDTOList) {
@@ -81,6 +87,10 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         //获取当前登录用户id
         User user = UserUtil.getLoginUser();
         Integer userId = user.getUserId();
+        if (userMapper.selectById(userId).getIsSilence())
+            throw new MyRuntimeException("用户已被禁言");
+        if (commentVO.getCommentContent().length() > 2550)
+            throw new MyRuntimeException("评论过长");
         comment.setUserId(userId);
         comment.setArticleId(commentVO.getArticleId());
         comment.setCommentContent(commentVO.getCommentContent());

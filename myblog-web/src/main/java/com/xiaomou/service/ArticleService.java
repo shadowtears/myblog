@@ -3,9 +3,11 @@ package com.xiaomou.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.xiaomou.dto.ArchiveDTO;
 import com.xiaomou.dto.ArticleHomeDTO;
+import com.xiaomou.dto.ArticleSearchDTO;
 import com.xiaomou.dto.ListArticleDTO;
 import com.xiaomou.entity.Article;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.xiaomou.vo.ConditionVO;
 import com.xiaomou.vo.SaveOrUpdateArticleVO;
 
 import java.util.List;
@@ -30,4 +32,6 @@ public interface ArticleService extends IService<Article> {
     List<ArticleHomeDTO> listArticles(Long current);
 
     IPage<ArchiveDTO> listArchives(Integer current);
+
+    List<ArticleSearchDTO> listArticlesBySearch(ConditionVO condition);
 }

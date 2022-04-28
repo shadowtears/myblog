@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.xiaomou.constant.DefaultUser;
+import com.xiaomou.constant.CommonConst;
 import com.xiaomou.constant.RedisPrefixConst;
 import com.xiaomou.dto.UserListPageDTO;
 import com.xiaomou.entity.Api;
@@ -154,15 +154,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 //                设置密码
                 .password("{bcrypt}" + encode)
                 //设置默认头像
-                .avatar(DefaultUser.DEFAULT_AVATAR)
+                .avatar(CommonConst.DEFAULT_AVATAR)
                 //设置默认昵称
-                .nickname(DefaultUser.NICKNAME)
+                .nickname(CommonConst.NICKNAME)
                 .createTime(new Date())
                 .username(userVO.getUsername())
                 .build();
         boolean b = this.save(user);
 //      绑定用户角色
-        boolean c = this.roleMapper.insertNewUser(user.getUserId(), DefaultUser.ROLE_ID);
+        boolean c = this.roleMapper.insertNewUser(user.getUserId(), CommonConst.ROLE_ID);
     }
 
     /**

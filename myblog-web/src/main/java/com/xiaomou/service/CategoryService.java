@@ -1,7 +1,11 @@
 package com.xiaomou.service;
 
+import com.xiaomou.dto.ArticlePreviewListDTO;
+import com.xiaomou.dto.CategoryDTO;
 import com.xiaomou.entity.Category;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +17,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface CategoryService extends IService<Category> {
 
+    ArticlePreviewListDTO listArticlesByCategoryId(Integer categoryId,Integer current);
+
+    List<CategoryDTO> listCategories();
 }

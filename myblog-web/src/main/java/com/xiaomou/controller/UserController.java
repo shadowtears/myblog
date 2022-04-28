@@ -85,7 +85,7 @@ public class UserController {
     @PutMapping("/password")
     public Result updatePassword(@Valid @RequestBody UserVO user) {
         userService.updatePassword(user);
-        return Result.ok().message("修改成功！");
+        return Result.ok().message("修改成功！快去登录吧");
     }
 }
 

@@ -1,5 +1,9 @@
 package com.xiaomou.service.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.xiaomou.dto.ArticlePreviewDTO;
+import com.xiaomou.dto.ArticlePreviewListDTO;
 import com.xiaomou.dto.TagDTO;
 import com.xiaomou.entity.Tag;
 import com.xiaomou.mapper.ArticleMapper;
@@ -14,7 +18,7 @@ import java.util.List;
 
 /**
  * <p>
- *  服务实现类
+ * 服务实现类
  * </p>
  *
  * @author xiaomou
@@ -31,6 +35,17 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements TagSe
     @Override
     public List<TagDTO> listTagDTO() {
         List<TagDTO> tagDTOS = this.baseMapper.listTagDTO();
-        return  tagDTOS;
+        return tagDTOS;
+    }
+
+
+    @Override
+    public ArticlePreviewListDTO listTagsByTagId(Integer tagId, Integer current) {
+        //转换页码
+        Page<ArticlePreviewDTO> page = new Page<>(current, 9);
+        IPage<ArticlePreviewDTO> articles = articleMapper.listTagsByCondition(page, tagId);
+        List<ArticlePreviewDTO> records = articles.getRecords();
+        String name = null;
+        return new ArticlePreviewListDTO(records, name);
     }
 }

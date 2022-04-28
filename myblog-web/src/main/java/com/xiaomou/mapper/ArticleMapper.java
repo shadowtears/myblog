@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xiaomou.dto.ArchiveDTO;
 import com.xiaomou.dto.ArticleHomeDTO;
+import com.xiaomou.dto.ArticlePreviewDTO;
 import com.xiaomou.dto.ListArticleDTO;
 import com.xiaomou.entity.Article;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -28,4 +29,8 @@ public interface ArticleMapper extends BaseMapper<Article> {
     List<ArticleHomeDTO> listArticles(Long current);
 
     IPage<ArchiveDTO>  listArchives(Page<ArchiveDTO> page);
+
+    IPage<ArticlePreviewDTO> listArticlesByCondition(Page<ArticlePreviewDTO> page, @Param(value = "categoryId") Integer categoryId);
+
+    IPage<ArticlePreviewDTO> listTagsByCondition(Page<ArticlePreviewDTO> page,@Param(value = "tagId") Integer tagId);
 }
