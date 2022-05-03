@@ -2,26 +2,32 @@ package com.xiaomou.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
+
 import java.util.Date;
+
 import com.baomidou.mybatisplus.annotation.TableId;
+
 import java.io.Serializable;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author xiaomou
  * @since 2022-04-20
  */
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @TableName("tb_user_login")
-@ApiModel(value="UserLogin对象", description="")
+@ApiModel(value = "UserLogin对象", description = "")
 public class UserLogin implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -29,8 +35,8 @@ public class UserLogin implements Serializable {
     @TableId(value = "user_login_id", type = IdType.AUTO)
     private Integer userLoginId;
 
-    @ApiModelProperty(value = "昵称")
-    private String nickname;
+    @ApiModelProperty(value = "用户名")
+    private String userName;
 
     @ApiModelProperty(value = "登录的ip地址")
     private String ipAddress;

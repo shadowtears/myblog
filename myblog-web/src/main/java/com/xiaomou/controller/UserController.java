@@ -9,6 +9,7 @@ import com.xiaomou.dto.UserListPageDTO;
 import com.xiaomou.service.UserService;
 import com.xiaomou.vo.UserQueryVO;
 import com.xiaomou.vo.UserVO;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.apache.ibatis.annotations.Param;
@@ -28,6 +29,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/user")
+@Api(tags = "用户模块")
 public class UserController {
 
     @Autowired

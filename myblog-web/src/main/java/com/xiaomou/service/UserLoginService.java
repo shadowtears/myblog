@@ -14,6 +14,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface UserLoginService extends IService<UserLogin> {
 
-    IPage<UserLogin> getUserInfoList(Integer current, Integer size, String nickname);
+    IPage<UserLogin> getUserInfoList(Integer current, Integer size, String username);
 
 }

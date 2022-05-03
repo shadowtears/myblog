@@ -1,11 +1,13 @@
 package com.xiaomou.config;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xiaomou.entity.Api;
 import com.xiaomou.handler.exception.MyAccessDeniedException;
 import com.xiaomou.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -13,6 +15,7 @@ import org.springframework.util.AntPathMatcher;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 
 /**
@@ -22,8 +25,8 @@ import java.util.List;
 @Component
 public class DynamicPermission {
     private final static String PERMISSION_KEY = "PERMISSION_KEY";
-    //    @Autowired
-//    private   RedisTemplate<String,Object> redisTemplate;
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
     @Autowired
     HttpServletRequest request;
     @Autowired
@@ -57,7 +60,9 @@ public class DynamicPermission {
             //这个鉴权经查询常要用到 可以加入缓存
             //免得
             List<Api> apiUrls = getApiUrlByUserName(username);
-            //AntPathMatcher antPathMatcher = new AntPathMatcher();
+            ObjectMapper objectMapper = new ObjectMapper();
+            apiUrls = objectMapper.convertValue(apiUrls, new TypeReference<List<Api>>() {
+            });
             //当前访问路径
             String requestURI = request.getRequestURI();
             //提交类型
@@ -92,20 +97,19 @@ public class DynamicPermission {
 
         List<Api> urlApis = null;
         String key = PERMISSION_KEY + "_" + username;
-        String api = "";
-//        String api = (String) redisTemplate.opsForValue().get(key);
+//        String api = "";
+        String api = (String) redisTemplate.opsForValue().get(key);
         if (api != null && api != "") {
-            //urlApis= JSON.parseObject(api, List.class);
-            // System.out.println("缓存中"+urlApis);
-            // return  urlApis;
-            urlApis = (List<Api>) new ObjectMapper().readValue(api, Api.class);
-            System.out.println(urlApis);
+            urlApis = new ObjectMapper().readValue(api, List.class);
+//            System.out.println("缓存中" + urlApis);
             return urlApis;
+//            urlApis = (List<Api>) new ObjectMapper().readValue(api, Api.class);
+//            System.out.println(urlApis);
+//            return urlApis;
         }
         List<Api> apis = userService.getApiUrlByUserName(username);
-        //加入缓存然后设置过期时间为半个小时
-//        redisTemplate.opsForValue().set(key, JSON.toJSONString(apis),Duration.ofSeconds(1800L));
+//        加入缓存然后设置过期时间为半个小时
+        redisTemplate.opsForValue().set(key, new ObjectMapper().writeValueAsString(apis), Duration.ofSeconds(1800L));
         return apis;
     }
 }
-

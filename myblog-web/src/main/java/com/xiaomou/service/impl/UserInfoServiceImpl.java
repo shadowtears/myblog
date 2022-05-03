@@ -10,7 +10,12 @@ import com.xiaomou.mapper.*;
 import com.xiaomou.service.UserInfoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
+
+import static com.xiaomou.constant.RedisPrefixConst.NOTICE;
 
 /**
  * <p>
@@ -33,6 +38,8 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
     private TagMapper tagMapper;
     @Autowired
     private UserLoginMapper userLoginMapper;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
 
     @Override
@@ -49,7 +56,8 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         //标签数量
         Integer tagCount = tagMapper.selectCount(null);
         //公告
-        String notice = "来了一个小滑稽,点个赞在走吧";
+        Object value = redisTemplate.boundValueOps(NOTICE).get();
+        String notice = Objects.nonNull(value) ? value.toString() : "发布你的第一篇公告吧";
         QueryWrapper<UserLogin> wrapper = new QueryWrapper<>();
         wrapper.select("DISTINCT ip_address");
         Integer viewsCount = userLoginMapper.selectCount(wrapper);

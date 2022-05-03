@@ -11,6 +11,7 @@ import com.xiaomou.entity.Api;
 import com.xiaomou.entity.User;
 import com.xiaomou.handler.exception.MyRuntimeException;
 import com.xiaomou.mapper.RoleMapper;
+import com.xiaomou.mapper.UserLoginMapper;
 import com.xiaomou.mapper.UserMapper;
 import com.xiaomou.service.UserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
