@@ -38,10 +38,10 @@ public class CommentController {
             @ApiImplicitParam(name = "articleId", value = "文章id", required = true, dataType = "Integer"),
             @ApiImplicitParam(name = "current", value = "当前页码", required = true, dataType = "Integer")})
     @GetMapping("/comments")
-    private Result listComments(@RequestParam(value = "articleId") Integer articleId, @RequestParam(value = "current")Integer current) {
+    private Result listComments(@RequestParam(value = "articleId") Integer articleId, @RequestParam(value = "current") Integer current) {
 
         PageDTO<CommentDTO> data = commentService.listComments(articleId, current);
-        return  Result.ok().data("data", data);
+        return Result.ok().data("data", data);
 
     }
 
@@ -51,7 +51,7 @@ public class CommentController {
 
         commentService.saveComment(commentVO);
 
-        return  Result.ok();
+        return Result.ok();
     }
 
     @ApiOperation(value = "查看回复评论")
@@ -61,20 +61,26 @@ public class CommentController {
 
         List<ReplyDTO> data = commentService.listRepliesByCommentId(commentId, current);
 
-        return  Result.ok().data("data", data);
+        return Result.ok().data("data", data);
     }
 
 
     @ApiOperation(value = "分页获取用户评论列表")
     @GetMapping("/getUserCommentList")
-    public Result getUserInfoList (Integer current,Integer size ,String nickname){
+    public Result getUserInfoList(Integer current, Integer size, String nickname) {
 
         List<CommentBackDTO> list = commentService.getUserReplyList(current, size, nickname);
         int total = commentService.count();
-        return  Result.ok().data("total", total).data("data", list);
+        return Result.ok().data("total", total).data("data", list);
 
     }
 
+    @ApiOperation(value = "评论点赞")
+    @PostMapping("/comments/like")
+    public Result saveCommentList(Integer commentId) {
+        commentService.saveCommentLike(commentId);
+        return Result.ok().message("点赞成功！");
+    }
 
 }
 

@@ -3,6 +3,7 @@ package com.xiaomou.service;
 import com.xiaomou.dto.BlogHomeInfoDTO;
 import com.xiaomou.entity.UserInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.xiaomou.vo.UserInfoVO;
 
 /**
  * <p>
@@ -14,4 +15,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface UserInfoService extends IService<UserInfo> {
     BlogHomeInfoDTO getBlogInfo();
+
+    void updateUserInfo(UserInfoVO userInfoVO);
 }

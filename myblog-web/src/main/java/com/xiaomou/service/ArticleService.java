@@ -1,10 +1,7 @@
 package com.xiaomou.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.xiaomou.dto.ArchiveDTO;
-import com.xiaomou.dto.ArticleHomeDTO;
-import com.xiaomou.dto.ArticleSearchDTO;
-import com.xiaomou.dto.ListArticleDTO;
+import com.xiaomou.dto.*;
 import com.xiaomou.entity.Article;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xiaomou.vo.ConditionVO;
@@ -34,4 +31,8 @@ public interface ArticleService extends IService<Article> {
     IPage<ArchiveDTO> listArchives(Integer current);
 
     List<ArticleSearchDTO> listArticlesBySearch(ConditionVO condition);
+
+    void saveArticleLike(Integer articleId);
+
+    ArticleDTO myGetById(Integer articleId);
 }

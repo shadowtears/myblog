@@ -1,6 +1,7 @@
 package com.xiaomou.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.xiaomou.dto.*;
 import com.xiaomou.entity.Comment;
 import com.xiaomou.entity.User;
@@ -13,9 +14,14 @@ import com.xiaomou.util.HTMLUtil;
 import com.xiaomou.util.UserUtil;
 import com.xiaomou.vo.CommentVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+
+import static com.xiaomou.constant.RedisPrefixConst.COMMENT_LIKE_COUNT;
+import static com.xiaomou.constant.RedisPrefixConst.COMMENT_USER_LIKE;
 
 /**
  * <p>
@@ -30,6 +36,8 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
 
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @Override
     public PageDTO<CommentDTO> listComments(Integer articleId, Integer current) {
@@ -49,7 +57,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         for (CommentDTO commentDTO : commentDTOList) {
             commentIdList.add(commentDTO.getId());
             //封装评论点赞量
-            // commentDTO.setLikeCount(likeCountMap.get(commentDTO.getId().toString()));
+             commentDTO.setLikeCount((Integer) redisTemplate.boundHashOps(COMMENT_LIKE_COUNT).get(commentDTO.getId().toString()));
         }
         //根据评论id集合查询所有分页回复数据
         List<ReplyDTO> replyDTOList = this.baseMapper.listReplies(commentIdList);
@@ -122,5 +130,30 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         List<CommentBackDTO> replyList = this.baseMapper.getUserReplyList((current - 1) * size, size, nickname);
 
         return replyList;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void saveCommentLike(Integer commentId) {
+        // 查询当前用户点赞过的评论id集合
+        HashSet<Integer> commentLikeSet = (HashSet<Integer>) redisTemplate.boundHashOps(COMMENT_USER_LIKE).get(UserUtil.getLoginUser().getUserId().toString());
+        // 第一次点赞则创建
+        if (CollectionUtils.isEmpty(commentLikeSet)) {
+            commentLikeSet = new HashSet<>();
+        }
+        // 判断是否点赞
+        if (commentLikeSet.contains(commentId)) {
+            // 点过赞则删除评论id
+            commentLikeSet.remove(commentId);
+            // 评论点赞量-1
+            redisTemplate.boundHashOps(COMMENT_LIKE_COUNT).increment(commentId.toString(), -1);
+        } else {
+            // 未点赞则增加评论id
+            commentLikeSet.add(commentId);
+            // 评论点赞量+1
+            redisTemplate.boundHashOps(COMMENT_LIKE_COUNT).increment(commentId.toString(), 1);
+        }
+        // 保存点赞记录
+        redisTemplate.boundHashOps(COMMENT_USER_LIKE).put(UserUtil.getLoginUser().getUserId().toString(), commentLikeSet);
     }
 }

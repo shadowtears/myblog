@@ -3,12 +3,10 @@ package com.xiaomou.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.xiaomou.dto.ArchiveDTO;
-import com.xiaomou.dto.ArticleHomeDTO;
-import com.xiaomou.dto.ArticleSearchDTO;
-import com.xiaomou.dto.ListArticleDTO;
+import com.xiaomou.dto.*;
 import com.xiaomou.entity.Article;
 import com.xiaomou.entity.ArticleTag;
 import com.xiaomou.mapper.ArticleMapper;
@@ -17,18 +15,23 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xiaomou.service.ArticleTagService;
 import com.xiaomou.service.CommentService;
 import com.xiaomou.util.HTMLUtil;
+import com.xiaomou.util.UserUtil;
 import com.xiaomou.vo.ConditionVO;
 import com.xiaomou.vo.SaveOrUpdateArticleVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.servlet.http.HttpSession;
+import java.io.Serializable;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.xiaomou.constant.CommonConst.POST_TAG;
 import static com.xiaomou.constant.CommonConst.PRE_TAG;
+import static com.xiaomou.constant.RedisPrefixConst.*;
 
 /**
  * <p>
@@ -48,6 +51,12 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     private CommentService commentService;
     @Autowired
     private ArticleMapper articleMapper;
+    @Autowired
+    private RedisTemplate redisTemplate;
+    @Autowired
+    private HttpSession session;
+    @Autowired
+    private ArticleMapper articleDao;
 
     /**
      * 更新或者新增文章
@@ -95,7 +104,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     @Override
     public SaveOrUpdateArticleVO getArticleById(Integer articleId) {
         //获取当前文章的信息
-        System.out.println(articleId);
+//        System.out.println(articleId);
         Article article = articleService.getById(articleId);
         //在获取当前文章的标签列表id信息
         QueryWrapper<ArticleTag> wrapper = new QueryWrapper<>();
@@ -165,5 +174,63 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                     .articleContent(articleContent)
                     .build();
         }).collect(Collectors.toList());
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void saveArticleLike(Integer articleId) {
+        // 查询当前用户点赞过的文章id集合
+        Set<Integer> articleLikeSet = (Set<Integer>) redisTemplate.boundHashOps(ARTICLE_USER_LIKE).get(UserUtil.getLoginUser().getUserId().toString());
+        // 第一次点赞则创建
+        if (CollectionUtils.isEmpty(articleLikeSet)) {
+            articleLikeSet = new HashSet<>();
+        }
+        // 判断是否点赞
+        if (articleLikeSet.contains(articleId)) {
+            // 点过赞则删除文章id
+            articleLikeSet.remove(articleId);
+            // 文章点赞量-1
+            redisTemplate.boundHashOps(ARTICLE_LIKE_COUNT).increment(articleId.toString(), -1);
+        } else {
+            // 未点赞则增加文章id
+            articleLikeSet.add(articleId);
+            // 文章点赞量+1
+            redisTemplate.boundHashOps(ARTICLE_LIKE_COUNT).increment(articleId.toString(), 1);
+        }
+        // 保存点赞记录
+        redisTemplate.boundHashOps(ARTICLE_USER_LIKE).put(UserUtil.getLoginUser().getUserId().toString(), articleLikeSet);
+    }
+
+    @Override
+    public ArticleDTO myGetById(Integer articleId) {
+        // 更新文章浏览量
+        updateArticleViewsCount(articleId);
+        // 查询id对应的文章
+        Article article = articleDao.selectById(articleId);
+        ArticleDTO articleDTO = new ArticleDTO(article);
+        // 封装点赞量和浏览量
+        articleDTO.setViewsCount((Integer) redisTemplate.boundHashOps(ARTICLE_VIEWS_COUNT).get(articleId.toString()));
+        articleDTO.setLikeCount((Integer) redisTemplate.boundHashOps(ARTICLE_LIKE_COUNT).get(articleId.toString()));
+        return articleDTO;
+    }
+
+    /**
+     * 更新文章浏览量
+     *
+     * @param articleId 文章id
+     */
+    @Async
+    public void updateArticleViewsCount(Integer articleId) {
+        // 判断是否第一次访问，增加浏览量
+        Set<Integer> set = (Set<Integer>) session.getAttribute("articleSet");
+        if (Objects.isNull(set)) {
+            set = new HashSet<>();
+        }
+        if (!set.contains(articleId)) {
+            set.add(articleId);
+            session.setAttribute("articleSet", set);
+            // 浏览量+1
+            redisTemplate.boundHashOps(ARTICLE_VIEWS_COUNT).increment(articleId.toString(), 1);
+        }
     }
 }

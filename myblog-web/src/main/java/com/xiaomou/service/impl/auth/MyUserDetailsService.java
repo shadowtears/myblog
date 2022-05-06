@@ -6,6 +6,7 @@ import com.xiaomou.handler.auth.MyAuthenticationFailureHandler;
 import com.xiaomou.handler.auth.MyAuthenticationSuccessHandler;
 import com.xiaomou.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +17,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
+import static com.xiaomou.constant.RedisPrefixConst.ARTICLE_USER_LIKE;
+import static com.xiaomou.constant.RedisPrefixConst.COMMENT_USER_LIKE;
 
 /**
  * @author MouHongDa
@@ -26,6 +31,8 @@ public class MyUserDetailsService implements UserDetailsService, UserDetailsPass
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -47,6 +54,8 @@ public class MyUserDetailsService implements UserDetailsService, UserDetailsPass
             MyUserDetails myUserDetails = new MyUserDetails();
             myUserDetails.setUser(user);
             myUserDetails.setAuthorities(authorities);
+            myUserDetails.setArticleLikeSet((Set<Integer>) redisTemplate.boundHashOps(ARTICLE_USER_LIKE).get(user.getUserId().toString()));
+            myUserDetails.setCommentLikeSet((Set<Integer>) redisTemplate.boundHashOps(COMMENT_USER_LIKE).get(user.getUserId().toString()));
             return myUserDetails;
         } else {
             throw new UsernameNotFoundException("没有该用户");

@@ -35,4 +35,11 @@ public interface CommentService extends IService<Comment> {
 
 
     List<CommentBackDTO>  getUserReplyList (Integer current, Integer size , String nickname);
+
+    /**
+     * 点赞评论
+     *
+     * @param commentId 评论id
+     */
+    void saveCommentLike(Integer commentId);
 }

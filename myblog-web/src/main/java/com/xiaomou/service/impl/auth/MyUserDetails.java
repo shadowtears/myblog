@@ -27,6 +27,8 @@ public class MyUserDetails implements UserDetails {
     private boolean accountNonLocked = true;
     private boolean credentialsNonExpired = true;
     private boolean enabled = true;
+    private Set<Integer> articleLikeSet;
+    private Set<Integer> commentLikeSet;
 
     public MyUserDetails(User user, Collection<? extends GrantedAuthority> authorities) {
         this.user = user;
@@ -35,6 +37,14 @@ public class MyUserDetails implements UserDetails {
 
     public void setAuthorities(Collection<? extends GrantedAuthority> authorities) {
         this.authorities = authorities;
+    }
+
+    public void setArticleLikeSet(Set<Integer> articleLikeSet) {
+        this.articleLikeSet = articleLikeSet;
+    }
+
+    public void setCommentLikeSet(Set<Integer> commentLikeSet) {
+        this.commentLikeSet = commentLikeSet;
     }
 
     @Override

@@ -75,8 +75,8 @@ public class DynamicPermission {
             for (Api item : apiUrls) {
                 if (pathMatcher.match(item.getUrl(), requestURI)) {
                     hashAntPath = true;
+                    hasMethod = item.getMethod().toUpperCase().indexOf(urlMethod.toUpperCase());
                 }
-                hasMethod = item.getMethod().toUpperCase().indexOf(urlMethod.toUpperCase());
                 if (hashAntPath && hasMethod != -1) {
                     break;
                 }

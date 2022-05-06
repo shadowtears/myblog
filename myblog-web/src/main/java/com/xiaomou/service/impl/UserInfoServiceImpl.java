@@ -2,6 +2,7 @@ package com.xiaomou.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.xiaomou.dto.BlogHomeInfoDTO;
 import com.xiaomou.entity.User;
 import com.xiaomou.entity.UserInfo;
@@ -9,10 +10,14 @@ import com.xiaomou.entity.UserLogin;
 import com.xiaomou.mapper.*;
 import com.xiaomou.service.UserInfoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.xiaomou.util.UserUtil;
+import com.xiaomou.vo.UserInfoVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.Objects;
 
 import static com.xiaomou.constant.RedisPrefixConst.NOTICE;
@@ -71,5 +76,16 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
                 notice,
                 viewsCount);
         return blogHomeInfoDTO;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void updateUserInfo(UserInfoVO userInfoVO) {
+        // 封装用户信息
+        userMapper.update(null, new LambdaUpdateWrapper<User>()
+                .set(User::getNickname, userInfoVO.getNickname())
+                .set(User::getIntro, userInfoVO.getIntro())
+                .set(User::getUpdateTime,new Date())
+                .eq(User::getUserId,UserUtil.getLoginUser().getUserId()));
     }
 }

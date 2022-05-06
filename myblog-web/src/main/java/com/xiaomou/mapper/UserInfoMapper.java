@@ -2,6 +2,7 @@ package com.xiaomou.mapper;
 
 import com.xiaomou.entity.UserInfo;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
  * <p>
@@ -11,6 +12,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @author xiaomou
  * @since 2022-04-20
  */
+@Mapper
 public interface UserInfoMapper extends BaseMapper<UserInfo> {
 
 }

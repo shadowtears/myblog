@@ -3,10 +3,7 @@ package com.xiaomou.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.xiaomou.Result;
-import com.xiaomou.dto.ArchiveDTO;
-import com.xiaomou.dto.ArticleHomeDTO;
-import com.xiaomou.dto.ArticleSearchDTO;
-import com.xiaomou.dto.ListArticleDTO;
+import com.xiaomou.dto.*;
 import com.xiaomou.entity.Article;
 import com.xiaomou.service.ArticleService;
 import com.xiaomou.vo.ConditionVO;
@@ -93,7 +90,7 @@ public class ArticleController {
     @ApiOperation(value = "查看首页文章")
     @GetMapping("/articles/{articleId}")
     public Result getArticleById(@PathVariable("articleId") Integer articleId) {
-        Article article = articleService.getById(articleId);
+        ArticleDTO article = articleService.myGetById(articleId);
         return Result.ok().data("data", article);
     }
 
@@ -101,6 +98,14 @@ public class ArticleController {
     @GetMapping("/articles/search")
     public Result listArticlesBySearch(ConditionVO condition) {
         return Result.ok().data("data", articleService.listArticlesBySearch(condition));
+    }
+
+    @ApiOperation(value = "点赞文章")
+    @ApiImplicitParam(name = "articleId", value = "文章id", required = true, dataType = "Integer")
+    @PostMapping("/articles/like")
+    public Result saveArticleLike(Integer articleId) {
+        articleService.saveArticleLike(articleId);
+        return Result.ok().message("点赞成功");
     }
 }
 

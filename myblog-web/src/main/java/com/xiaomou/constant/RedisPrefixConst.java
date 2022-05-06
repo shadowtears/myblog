@@ -23,4 +23,27 @@ public final class RedisPrefixConst {
      * 上次登录时间
      */
     public static final String LAST_LONG_TIME = "lastLongTime";
+
+    /**
+     * 文章浏览量
+     */
+    public static final String ARTICLE_VIEWS_COUNT = "article_views_count";
+
+    /**
+     * 文章点赞量
+     */
+    public static final String ARTICLE_LIKE_COUNT = "article_like_count";
+
+    /**
+     * 用户点赞文章
+     */
+    public static final String ARTICLE_USER_LIKE = "article_user_like";
+    /**
+     * 用户点赞评论
+     */
+    public static final String COMMENT_USER_LIKE = "comment_user_like";
+    /**
+     * 评论点赞量
+     */
+    public static final String COMMENT_LIKE_COUNT = "comment_like_count";
 }

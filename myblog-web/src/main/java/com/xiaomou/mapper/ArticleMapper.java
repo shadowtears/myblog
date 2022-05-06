@@ -2,10 +2,7 @@ package com.xiaomou.mapper;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.xiaomou.dto.ArchiveDTO;
-import com.xiaomou.dto.ArticleHomeDTO;
-import com.xiaomou.dto.ArticlePreviewDTO;
-import com.xiaomou.dto.ListArticleDTO;
+import com.xiaomou.dto.*;
 import com.xiaomou.entity.Article;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
