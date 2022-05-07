@@ -8,6 +8,7 @@ import com.xiaomou.entity.User;
 import com.xiaomou.entity.UserInfo;
 import com.xiaomou.entity.UserLogin;
 import com.xiaomou.mapper.*;
+import com.xiaomou.service.AliOssService;
 import com.xiaomou.service.UserInfoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xiaomou.util.UserUtil;
@@ -16,10 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 import java.util.Objects;
 
+import static com.xiaomou.constant.RedisPrefixConst.IP_SET;
 import static com.xiaomou.constant.RedisPrefixConst.NOTICE;
 
 /**
@@ -45,6 +48,8 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
     private UserLoginMapper userLoginMapper;
     @Autowired
     private RedisTemplate redisTemplate;
+    @Autowired
+    private AliOssService aliOssService;
 
 
     @Override
@@ -63,9 +68,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         //公告
         Object value = redisTemplate.boundValueOps(NOTICE).get();
         String notice = Objects.nonNull(value) ? value.toString() : "发布你的第一篇公告吧";
-        QueryWrapper<UserLogin> wrapper = new QueryWrapper<>();
-        wrapper.select("DISTINCT ip_address");
-        Integer viewsCount = userLoginMapper.selectCount(wrapper);
+        Long viewsCount = redisTemplate.boundSetOps(IP_SET).size();
         BlogHomeInfoDTO blogHomeInfoDTO
                 = new BlogHomeInfoDTO(user.getNickname(),
                 user.getAvatar(),
@@ -85,7 +88,21 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         userMapper.update(null, new LambdaUpdateWrapper<User>()
                 .set(User::getNickname, userInfoVO.getNickname())
                 .set(User::getIntro, userInfoVO.getIntro())
-                .set(User::getUpdateTime,new Date())
-                .eq(User::getUserId,UserUtil.getLoginUser().getUserId()));
+                .set(User::getUpdateTime, new Date())
+                .eq(User::getUserId, UserUtil.getLoginUser().getUserId()));
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public String updateUserAvatar(MultipartFile file) {
+        // 头像上传oss，返回图片地址
+        String avatar = aliOssService.upload(file);
+        // 更新用户信息
+        User user = User.builder()
+                .userId(UserUtil.getLoginUser().getUserId())
+                .avatar(avatar)
+                .build();
+        userMapper.updateById(user);
+        return avatar;
     }
 }

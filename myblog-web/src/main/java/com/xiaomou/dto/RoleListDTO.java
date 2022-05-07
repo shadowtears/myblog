@@ -13,6 +13,6 @@ import java.io.Serializable;
 public class RoleListDTO implements Serializable {
     @ApiModelProperty(value = "角色名")
     private String description;
-    @ApiModelProperty(value = "角色名")
+    @ApiModelProperty(value = "角色总数")
     private Integer total;
 }

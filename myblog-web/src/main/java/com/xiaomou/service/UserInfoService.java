@@ -4,6 +4,7 @@ import com.xiaomou.dto.BlogHomeInfoDTO;
 import com.xiaomou.entity.UserInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xiaomou.vo.UserInfoVO;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * <p>
@@ -17,4 +18,6 @@ public interface UserInfoService extends IService<UserInfo> {
     BlogHomeInfoDTO getBlogInfo();
 
     void updateUserInfo(UserInfoVO userInfoVO);
+
+    String updateUserAvatar(MultipartFile file);
 }

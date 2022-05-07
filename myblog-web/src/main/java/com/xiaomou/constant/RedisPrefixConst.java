@@ -46,4 +46,9 @@ public final class RedisPrefixConst {
      * 评论点赞量
      */
     public static final String COMMENT_LIKE_COUNT = "comment_like_count";
+
+    /**
+     * ip集合
+     */
+    public static final String IP_SET = "ip_set";
 }

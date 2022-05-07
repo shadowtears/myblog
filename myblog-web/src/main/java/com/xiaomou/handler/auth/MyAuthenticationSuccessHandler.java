@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
 
+import static com.xiaomou.constant.RedisPrefixConst.IP_SET;
 import static com.xiaomou.constant.RedisPrefixConst.LAST_LONG_TIME;
 
 /**
@@ -74,6 +75,7 @@ public class MyAuthenticationSuccessHandler implements AuthenticationSuccessHand
                 .roleName(authority)
                 .lastLoginTime(lastLongTime)
                 .build();
+        redisTemplate.boundSetOps(IP_SET).add(ipAddress);
         //存入表判断不存在就保存
         loginService.saveOrUpdate(login);
     }

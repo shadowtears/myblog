@@ -43,12 +43,12 @@ public class UserInfoController {
         return Result.ok().message("修改成功！");
     }
 
-//    @ApiOperation(value = "修改用户头像")
-//    @ApiImplicitParam(name = "file", value = "用户头像", required = true, dataType = "MultipartFile")
-//    @PostMapping("/users/avatar")
-//    public Result updateUserInfo(MultipartFile file) {
-//        userInfoService.updateUserAvatar(file);
-//        return Result.ok().message("修改成功！");
-//    }
+    @ApiOperation(value = "修改用户头像")
+    @ApiImplicitParam(name = "file", value = "用户头像", required = true, dataType = "MultipartFile")
+    @PostMapping("/users/avatar")
+    public Result updateUserInfo(MultipartFile file) {
+        String avatar = userInfoService.updateUserAvatar(file);
+        return Result.ok().message("修改成功！").data("data",avatar);
+    }
 }
 

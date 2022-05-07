@@ -7,9 +7,14 @@
     </insert>
 
     <select id="getRoleList" resultType="com.xiaomou.dto.RoleListDTO">
-        SELECT tr.description,
-               COUNT(tr.role_name) as total
-        FROM tb_role tr
-        GROUP BY tr.role_name
+        SELECT
+            b.description,
+            COUNT( b.description ) AS total
+        FROM
+            tb_user a
+                INNER JOIN tb_role_user c ON a.user_id = c.user_id
+                INNER JOIN tb_role b ON c.role_id = b.role_id
+        GROUP BY
+            b.description
     </select>
 </mapper>

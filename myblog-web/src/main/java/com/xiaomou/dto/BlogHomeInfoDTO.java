@@ -46,9 +46,9 @@ public class BlogHomeInfoDTO {
     /**
      * 访问量
      */
-    private Integer viewsCount;
+    private Long viewsCount;
 
-    public BlogHomeInfoDTO(String nickname, String avatar, String intro, Integer articleCount, Integer categoryCount, Integer tagCount, String notice, Integer viewsCount) {
+    public BlogHomeInfoDTO(String nickname, String avatar, String intro, Integer articleCount, Integer categoryCount, Integer tagCount, String notice, Long viewsCount) {
         this.nickname = nickname;
         this.avatar = avatar;
         this.intro = intro;
