@@ -2,6 +2,7 @@ package com.xiaomou.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
@@ -9,6 +10,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xiaomou.dto.*;
 import com.xiaomou.entity.Article;
 import com.xiaomou.entity.ArticleTag;
+import com.xiaomou.entity.Comment;
 import com.xiaomou.mapper.ArticleMapper;
 import com.xiaomou.service.ArticleService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -232,5 +234,32 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             // 浏览量+1
             redisTemplate.boundHashOps(ARTICLE_VIEWS_COUNT).increment(articleId.toString(), 1);
         }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void updateArticleTop(Integer articleId, Integer isTop) {
+        // 修改文章置顶状态
+        LambdaUpdateWrapper<Article> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.eq(Article::getArticleId, articleId).set(Article::getIsTop, isTop);
+        articleMapper.update(null, wrapper);
+    }
+
+
+    @Transactional
+    @Override
+    public int deleteArticleById(Integer articleId) {
+        //先删除对应的文章
+        int i = this.baseMapper.deleteById(articleId);
+        //在删除在关联表中的标签
+        QueryWrapper<ArticleTag> articleTagQueryWrapper = new QueryWrapper<>();
+        articleTagQueryWrapper.eq("article_id", articleId);
+        int delete = articleTagService.getBaseMapper().delete(articleTagQueryWrapper);
+        //在删除博客的评论其实可以不用删 反正博客没了就看不见了
+        //但是还是要删除的
+        QueryWrapper<Comment> wrapper = new QueryWrapper<>();
+        wrapper.eq("article_id", articleId);
+        boolean remove = commentService.remove(wrapper);
+        return delete;
     }
 }

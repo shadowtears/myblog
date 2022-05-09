@@ -19,4 +19,6 @@ public interface AboutMapper extends BaseMapper<About> {
 
 
     AboutDTO getAbout();
+
+    int updateAbout(String aboutContent);
 }

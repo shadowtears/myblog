@@ -1,11 +1,13 @@
 package com.xiaomou.controller;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xiaomou.Result;
 import com.xiaomou.ResultInfo;
 import com.xiaomou.dto.UserListPageDTO;
+import com.xiaomou.entity.User;
 import com.xiaomou.service.UserService;
 import com.xiaomou.vo.UserQueryVO;
 import com.xiaomou.vo.UserVO;
@@ -88,6 +90,20 @@ public class UserController {
     public Result updatePassword(@Valid @RequestBody UserVO user) {
         userService.updatePassword(user);
         return Result.ok().message("修改成功！快去登录吧");
+    }
+    @ApiOperation(value = "/分页单表查询用户列表")
+    @GetMapping("/getUserListSignal")
+    public Result  getUserListSignal(Integer current,Integer size,String nickname){
+        QueryWrapper<User> queryWrapper=null;
+        if(nickname!=null && nickname!=""){
+            queryWrapper   = new QueryWrapper<>();
+            queryWrapper.like("nickname", nickname);
+        }
+        IPage page = userService.page(new Page<>(current, size), queryWrapper);
+        long total = page.getTotal();
+        List data = page.getRecords();
+        return  Result.ok().data("total", total).data("data", data);
+
     }
 }
 

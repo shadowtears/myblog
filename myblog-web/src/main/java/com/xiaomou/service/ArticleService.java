@@ -35,4 +35,8 @@ public interface ArticleService extends IService<Article> {
     void saveArticleLike(Integer articleId);
 
     ArticleDTO myGetById(Integer articleId);
+
+    void updateArticleTop(Integer articleId, Integer isTop);
+
+    int deleteArticleById(Integer articleId);
 }

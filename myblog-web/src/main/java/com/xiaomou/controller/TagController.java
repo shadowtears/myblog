@@ -3,19 +3,20 @@ package com.xiaomou.controller;
 
 import com.xiaomou.Result;
 import com.xiaomou.dto.ArticlePreviewListDTO;
+import com.xiaomou.dto.PageDTO;
 import com.xiaomou.dto.TagDTO;
+import com.xiaomou.entity.Category;
 import com.xiaomou.entity.Tag;
 import com.xiaomou.mapper.TagMapper;
 import com.xiaomou.service.TagService;
+import com.xiaomou.vo.ConditionVO;
+import com.xiaomou.vo.TagVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.bind.annotation.RestController;
-
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -33,12 +34,19 @@ public class TagController {
     @Autowired
     private TagService tagService;
 
-    @ApiOperation(value = "后台获取所有的标签")
+    @ApiOperation(value = "分页后台获取所有的标签")
+    @GetMapping("/listTag")
+    public Result listTagBackDTO(ConditionVO condition) {
+        PageDTO<Tag> tagPageDTO = tagService.listTagBackDTO(condition);
+        return Result.ok().message("查询成功").data("data", tagPageDTO);
+    }
+
+    @ApiOperation(value = "获取所有的标签")
     @GetMapping("/getTagList")
     public Result getTagList() {
-        List<Tag> tags = tagService.list();
-        if (tags.size() > 0) {
-            return Result.ok().data("data", tags);
+        List<Tag> tagList = tagService.list();
+        if (tagList.size() > 0) {
+            return Result.ok().data("data", tagList);
         } else {
             return Result.error();
         }
@@ -62,5 +70,18 @@ public class TagController {
         return Result.ok().data("data", data);
     }
 
+    @ApiOperation(value = "添加或修改标签")
+    @PostMapping("/saveOrUpdateTag")
+    public Result saveOrUpdateTag(@Valid @RequestBody TagVO tagVO) {
+        tagService.saveOrUpdateTag(tagVO);
+        return Result.ok().message("操作成功");
+    }
+
+    @ApiOperation(value = "删除标签")
+    @DeleteMapping("/deleteTag")
+    public Result deleteTag(@RequestBody List<Integer> tagIdList) {
+        tagService.deleteTag(tagIdList);
+        return Result.ok().message("删除成功");
+    }
 }
 

@@ -39,7 +39,7 @@ public class ListArticleDTO {
     private Date updateTime;
 
     @ApiModelProperty(value = "//是否置顶 0：不置顶 1：置顶")
-    private Boolean isTop;
+    private Integer isTop;
 
 
 }

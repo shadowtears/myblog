@@ -107,5 +107,19 @@ public class ArticleController {
         articleService.saveArticleLike(articleId);
         return Result.ok().message("点赞成功");
     }
+
+    @ApiOperation(value = "修改文章置顶")
+    @PutMapping("/articles/top/{articleId}")
+    public Result updateArticleTop(@PathVariable("articleId") Integer articleId, Integer isTop) {
+        articleService.updateArticleTop(articleId, isTop);
+        return Result.ok().message("修改成功");
+    }
+
+    @ApiOperation(value = "根据id删除文章")
+    @DeleteMapping("/article/deleteArticleById")
+    public Result deleteArticleById(Integer articleId) {
+        int i = articleService.deleteArticleById(articleId);
+        return Result.ok();
+    }
 }
 
