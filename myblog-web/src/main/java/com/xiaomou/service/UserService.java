@@ -6,12 +6,11 @@ import com.xiaomou.dto.UserListPageDTO;
 import com.xiaomou.entity.Api;
 import com.xiaomou.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.xiaomou.service.impl.auth.MyUserDetails;
 import com.xiaomou.vo.UserQueryVO;
 import com.xiaomou.vo.UserVO;
-import org.apache.ibatis.annotations.Param;
-import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -62,4 +61,13 @@ public interface UserService extends IService<User> {
      * @param user 用户对象
      */
     void updatePassword(UserVO user);
+
+    /**
+     * qq登录
+     *
+     * @param openId      qq openId
+     * @param accessToken qq token
+     * @return 用户登录信息
+     */
+    MyUserDetails qqLogin(String openId, String accessToken);
 }

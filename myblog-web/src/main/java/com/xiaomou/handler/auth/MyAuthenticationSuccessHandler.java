@@ -45,10 +45,10 @@ public class MyAuthenticationSuccessHandler implements AuthenticationSuccessHand
                 .code(ResultInfo.VERIFY_SUCCESS.getCode())
                 .message(ResultInfo.VERIFY_SUCCESS.getMessage()).data("user", user)));
 //      更新用户登录信息
-        updateUserLogin(user, request);
+        updateUserLogin(user, request, LoginTypeEnum.EMAIL.getDesc());
     }
 
-    public void updateUserLogin(MyUserDetails user, HttpServletRequest request) {
+    public void updateUserLogin(MyUserDetails user, HttpServletRequest request, String desc) {
         User loginUser = user.getUser();
         //获取当前ip地址和ip来源用户登录ip地址
         String ipAddress = IpUtil.getIp(request);
@@ -70,7 +70,7 @@ public class MyAuthenticationSuccessHandler implements AuthenticationSuccessHand
                 .ipAddress(ipAddress)
                 .ipSources(ipSource)
                 .userName(loginUser.getUsername())
-                .loginType(LoginTypeEnum.EMAIL.getDesc())
+                .loginType(desc)
                 .loginTime(now)
                 .roleName(authority)
                 .lastLoginTime(lastLongTime)

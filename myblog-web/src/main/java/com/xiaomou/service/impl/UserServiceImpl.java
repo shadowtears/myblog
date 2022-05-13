@@ -8,31 +8,48 @@ import com.xiaomou.constant.CommonConst;
 import com.xiaomou.constant.RedisPrefixConst;
 import com.xiaomou.dto.UserListPageDTO;
 import com.xiaomou.entity.Api;
+import com.xiaomou.entity.Role;
 import com.xiaomou.entity.User;
+import com.xiaomou.enums.LoginTypeEnum;
+import com.xiaomou.handler.auth.MyAuthenticationSuccessHandler;
 import com.xiaomou.handler.exception.MyRuntimeException;
 import com.xiaomou.mapper.RoleMapper;
-import com.xiaomou.mapper.UserLoginMapper;
 import com.xiaomou.mapper.UserMapper;
 import com.xiaomou.service.UserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.xiaomou.service.impl.auth.MyUserDetails;
+import com.xiaomou.service.impl.auth.MyUserDetailsService;
 import com.xiaomou.vo.UserQueryVO;
 import com.xiaomou.vo.UserVO;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.xiaomou.constant.RedisPrefixConst.ARTICLE_USER_LIKE;
+import static com.xiaomou.constant.RedisPrefixConst.COMMENT_USER_LIKE;
 
 /**
  * <p>
@@ -53,7 +70,31 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private RedisTemplate redisTemplate;
     @Autowired
     private UserMapper userMapper;
+    @Resource
+    private HttpServletRequest request;
+    @Autowired
+    private MyUserDetailsService myUserDetailsService;
+    @Autowired
+    private MyAuthenticationSuccessHandler myAuthenticationSuccessHandler;
+    /**
+     * qq appId
+     */
+    @Value("${qq.app-id}")
+    private String QQ_APP_ID;
 
+    /**
+     * qq获取用户信息接口地址
+     */
+    @Value("${qq.user-info-url}")
+    private String QQ_USER_INFO_URL;
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Bean
+    public RestTemplate restTemplate(RestTemplateBuilder builder) {
+        RestTemplate restTemplate = builder.build();
+        return restTemplate;
+    }
 
     @Override
     public User getUserByUsername(String username) {
@@ -197,5 +238,72 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         userMapper.update(new User(), new LambdaUpdateWrapper<User>()
                 .set(User::getPassword, "{bcrypt}" + BCrypt.hashpw(user.getPassword(), BCrypt.gensalt()))
                 .eq(User::getUsername, user.getUsername()));
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public MyUserDetails qqLogin(String openId, String accessToken) {
+        // 创建登录信息
+        MyUserDetails myUserDetails = null;
+        // 校验该第三方账户信息是否存在
+        User user = getUserAuth(openId);
+        if (Objects.nonNull(user)) {
+            // 存在则返回数据库中的用户信息登录封装
+            myUserDetails = (MyUserDetails) myUserDetailsService.loadUserByUsername(user.getUsername());
+        } else {
+            // 不存在通过openId和accessToken获取QQ用户信息，并创建用户
+            Map<String, String> formData = new HashMap<>(16);
+            // 定义请求参数
+            formData.put("openid", openId);
+            formData.put("access_token", accessToken);
+            formData.put("oauth_consumer_key", QQ_APP_ID);
+            // 获取QQ返回的用户信息
+            Map userInfoMap = null;
+            try {
+                userInfoMap = new ObjectMapper().readValue(restTemplate.getForObject(QQ_USER_INFO_URL, String.class, formData), Map.class);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if ((Integer) userInfoMap.get("ret") != 0)
+                throw new MyRuntimeException("第三方登录拉取失败");
+            // 第三方登录默认密码openId
+            String encode = bCryptPasswordEncoder.encode(openId);
+            // 将用户账号和信息存入数据库
+            User userInfo = User.builder()
+                    .username(openId)
+                    .password("{bcrypt}" + encode)
+                    .nickname((String) userInfoMap.get("nickname"))
+                    .avatar((String) userInfoMap.get("figureurl_qq_1"))
+                    .createTime(new Date())
+                    .build();
+            this.userMapper.insert(userInfo);
+            //绑定用户角色
+            boolean c = this.roleMapper.insertNewUser(userInfo.getUserId(), CommonConst.ROLE_ID);
+            Role role = this.roleMapper.selectById(CommonConst.ROLE_ID);
+            List<GrantedAuthority> authorities = new ArrayList<>();
+            authorities.add(new SimpleGrantedAuthority(role.getRoleName()));
+            //初始化返回信息
+            myUserDetails = (MyUserDetails) myUserDetailsService.loadUserByUsername(userInfo.getUsername());
+
+        }
+        myAuthenticationSuccessHandler.updateUserLogin(myUserDetails, request, LoginTypeEnum.QQ.getDesc());
+        // 将登录信息放入springSecurity管理
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(myUserDetails, null, myUserDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        return myUserDetails;
+    }
+
+
+    /**
+     * 检测第三方账号是否注册
+     *
+     * @param openId 第三方唯一id
+     * @return 用户账号信息
+     */
+    private User getUserAuth(String openId) {
+        // 查询账号信息
+        return userMapper.selectOne(new LambdaQueryWrapper<User>()
+                .select(User::getUserId,User::getUsername)
+                .eq(User::getUsername, openId));
     }
 }

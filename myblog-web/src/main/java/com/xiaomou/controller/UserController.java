@@ -9,12 +9,13 @@ import com.xiaomou.ResultInfo;
 import com.xiaomou.dto.UserListPageDTO;
 import com.xiaomou.entity.User;
 import com.xiaomou.service.UserService;
+import com.xiaomou.service.impl.auth.MyUserDetails;
 import com.xiaomou.vo.UserQueryVO;
 import com.xiaomou.vo.UserVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -91,19 +92,30 @@ public class UserController {
         userService.updatePassword(user);
         return Result.ok().message("修改成功！快去登录吧");
     }
+
     @ApiOperation(value = "/分页单表查询用户列表")
     @GetMapping("/getUserListSignal")
-    public Result  getUserListSignal(Integer current,Integer size,String nickname){
-        QueryWrapper<User> queryWrapper=null;
-        if(nickname!=null && nickname!=""){
-            queryWrapper   = new QueryWrapper<>();
+    public Result getUserListSignal(Integer current, Integer size, String nickname) {
+        QueryWrapper<User> queryWrapper = null;
+        if (nickname != null && nickname != "") {
+            queryWrapper = new QueryWrapper<>();
             queryWrapper.like("nickname", nickname);
         }
         IPage page = userService.page(new Page<>(current, size), queryWrapper);
         long total = page.getTotal();
         List data = page.getRecords();
-        return  Result.ok().data("total", total).data("data", data);
+        return Result.ok().data("total", total).data("data", data);
+    }
 
+    @ApiOperation(value = "qq登录")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "openId", value = "openId", required = true, dataType = "String"),
+            @ApiImplicitParam(name = "accessToken", value = "accessToken", required = true, dataType = "String")
+    })
+    @PostMapping("/oauth/qq")
+    public Result qqLogin(String openId, String accessToken) {
+        MyUserDetails user = userService.qqLogin(openId, accessToken);
+        return Result.ok().message("登录成功！").data("user", user);
     }
 }
 
