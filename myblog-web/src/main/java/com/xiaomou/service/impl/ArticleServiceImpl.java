@@ -11,7 +11,10 @@ import com.xiaomou.dto.*;
 import com.xiaomou.entity.Article;
 import com.xiaomou.entity.ArticleTag;
 import com.xiaomou.entity.Comment;
+import com.xiaomou.entity.Tag;
 import com.xiaomou.mapper.ArticleMapper;
+import com.xiaomou.mapper.CategoryMapper;
+import com.xiaomou.mapper.TagMapper;
 import com.xiaomou.service.ArticleService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xiaomou.service.ArticleTagService;
@@ -59,6 +62,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     private HttpSession session;
     @Autowired
     private ArticleMapper articleDao;
+    @Autowired
+    private CategoryMapper categoryMapper;
 
     /**
      * 更新或者新增文章
@@ -123,7 +128,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
     @Override
     public List<ArticleHomeDTO> listArticles(Long current) {
-        List<ArticleHomeDTO> articleHomeDTOS = this.baseMapper.listArticles((current - 1) * 10);
+        List<ArticleHomeDTO> articleHomeDTOS = this.baseMapper.listArticles((current - 1) * 5);
         //文章内容过滤markdown标签展示
         for (ArticleHomeDTO articleDTO : articleHomeDTOS) {
             articleDTO.setArticleContent(HTMLUtil.deleteArticleTag(articleDTO.getArticleContent()));
@@ -210,6 +215,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         // 查询id对应的文章
         Article article = articleDao.selectById(articleId);
         ArticleDTO articleDTO = new ArticleDTO(article);
+//      查询对应的分类ID和分类名
+        articleDTO.setCategoryName(categoryMapper.selectById(articleDTO.getCategoryId()).getCategoryName());
         // 封装点赞量和浏览量
         articleDTO.setViewsCount((Integer) redisTemplate.boundHashOps(ARTICLE_VIEWS_COUNT).get(articleId.toString()));
         articleDTO.setLikeCount((Integer) redisTemplate.boundHashOps(ARTICLE_LIKE_COUNT).get(articleId.toString()));

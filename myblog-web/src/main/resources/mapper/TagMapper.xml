@@ -3,9 +3,17 @@
 <mapper namespace="com.xiaomou.mapper.TagMapper">
 
     <select id="listTagDTO" resultType="com.xiaomou.dto.TagDTO">
-        select
-            tag_id,
-            tag_name
+        select tag_id,
+               tag_name
         from tb_tag
+    </select>
+    <select id="listTagDTObyArticleId" resultType="com.xiaomou.dto.TagDTO">
+        SELECT tt.tag_id,
+               tt.tag_name
+        FROM tb_tag tt
+                 LEFT JOIN tb_article_tag tat ON tt.tag_id = tat.tag_id
+                 LEFT JOIN tb_article ta ON ta.article_id = tat.article_id
+        WHERE ta.is_draft != 1
+	    AND ta.article_id = #{article_id}
     </select>
 </mapper>

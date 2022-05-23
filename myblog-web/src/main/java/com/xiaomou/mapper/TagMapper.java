@@ -4,12 +4,13 @@ import com.xiaomou.dto.TagDTO;
 import com.xiaomou.entity.Tag;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
 /**
  * <p>
- *  Mapper 接口
+ * Mapper 接口
  * </p>
  *
  * @author xiaomou
@@ -19,4 +20,6 @@ import java.util.List;
 public interface TagMapper extends BaseMapper<Tag> {
 
     List<TagDTO> listTagDTO();
+
+    List<TagDTO> listTagDTObyArticleId(@Param("article_id") Integer article_id);
 }

@@ -42,6 +42,10 @@ public class ArticleDTO {
 
     private Date updateTime;
 
+    private Integer categoryId;
+
+    private String categoryName;
+
     /**
      * 点赞量
      */
@@ -55,6 +59,7 @@ public class ArticleDTO {
     public ArticleDTO(Article article) {
         this.articleId = article.getArticleId();
         this.articleCover = article.getArticleCover();
+        this.categoryId = article.getCategoryId();
         this.articleContent = article.getArticleContent();
         this.articleTitle = article.getArticleTitle();
         this.createTime = article.getCreateTime();

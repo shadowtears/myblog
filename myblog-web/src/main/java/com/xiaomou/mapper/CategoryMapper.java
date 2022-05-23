@@ -1,9 +1,11 @@
 package com.xiaomou.mapper;
 
 import com.xiaomou.dto.CategoryDTO;
+import com.xiaomou.dto.TagDTO;
 import com.xiaomou.entity.Category;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 

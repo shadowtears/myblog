@@ -31,9 +31,9 @@
         LIMIT #{current},#{size}
 
         )a
-        inner join tb_category b on a.category_id=b.category_id
-        inner join tb_article_tag c on a.article_id=c.article_id
-        inner join tb_tag d on c.tag_id=d.tag_id
+        LEFT join tb_category b on a.category_id=b.category_id
+        LEFT join tb_article_tag c on a.article_id=c.article_id
+        LEFT join tb_tag d on c.tag_id=d.tag_id
         <where>
             <if test='articleTitle!=null and articleTitle!="" '>
                 a.article_title like concat('%',#{articleTitle},'%')
@@ -50,7 +50,9 @@
         <result column="is_top" property="isTop"></result>
         <result column="create_time" property="createTime"></result>
         <result column="category_name" property="categoryName"></result>
-        <collection property="tagDTOList" ofType="com.xiaomou.dto.TagDTO">
+        <collection property="tagDTOList" select="com.xiaomou.mapper.TagMapper.listTagDTObyArticleId"
+                    column="article_id"
+                    ofType="com.xiaomou.dto.TagDTO">
             <id column="tag_id" property="tagId"></id>
             <result column="tag_name" property="tagName"></result>
         </collection>
@@ -58,25 +60,21 @@
 
 
     <select id="listArticles" resultMap="listArticles">
-        select a.article_id,
-               a.article_cover,
-               a.article_title,
-               a.article_content,
-               a.create_time,
-               a.is_top,
-               a.category_id,
-               b.category_name,
-               d.tag_id,
-               d.tag_name
-        from tb_article a,
-             tb_category b,
-             tb_article_tag c,
-             tb_tag d
-        where a.category_id = b.category_id
-          and a.article_id = c.article_id
-          and c.tag_id = d.tag_id
-        order by is_top desc, create_time desc
-            LIMIT #{current}, 10
+        SELECT DISTINCT(a.article_id),
+                       a.article_cover,
+                       a.article_title,
+                       a.article_content,
+                       a.create_time,
+                       a.is_top,
+                       a.category_id,
+                       b.category_name
+        FROM tb_article a
+                 LEFT JOIN tb_category b ON a.category_id = b.category_id
+                 LEFT JOIN tb_article_tag c ON a.article_id = c.article_id
+        WHERE a.is_draft != 1
+        ORDER BY is_top DESC,
+            create_time DESC
+            LIMIT #{current}, 5
     </select>
     <select id="listArchives" resultType="com.xiaomou.dto.ArchiveDTO">
         select a.article_id as id,

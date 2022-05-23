@@ -5,9 +5,9 @@ package com.xiaomou.constant;
  * @date 2022/4/25 18:35
  */
 public final class CommonConst {
-    public static final String DEFAULT_AVATAR = "https://jinyh.top/myblog/img/defalutUser-img.png";
-    public static final String MY_DOMAINS = "https://jinyh.top";
-    public static final String DEFAULT_DOMAINS = "http://549275946.oss-cn-beijing.aliyuncs.com";
+    public static final String DEFAULT_AVATAR = "https://oss.jinyh.top/myblog/img/defalutUser-img.png";
+    public static final String MY_DOMAINS = "https://oss.jinyh.top";
+    public static final String DEFAULT_DOMAINS = "http://1104429310.oss-cn-shenzhen-internal.aliyuncs.com";
     public static final String NICKNAME = "默认昵称";
     public static final Integer ROLE_ID = 2;
     /**
