@@ -46,7 +46,6 @@ public class MyUsernamePasswordAuthenticationFilter extends UsernamePasswordAuth
                         password = "";
                     }
                     username = username.trim();
-//                    System.out.println("用户名" + username + "密码" + password);
                     UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(username, password);
                     setDetails(request, authRequest);
                     return this.getAuthenticationManager().authenticate(authRequest);
